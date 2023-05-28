@@ -1,7 +1,23 @@
 <script>
     import { generations } from "./generations";
+    import { page } from "$app/stores";
+    import { goto } from "$app/navigation";
     export let data;
+    $: monsterId = $page.url.searchParams.get("monsterId");
+    $: monster = data.monsters.find((monster) => monster.id === monsterId)
+    $: monsterId2 = $page.url.searchParams.get("monsterId2") || '';
+    $: monster2 = data.monsters.find((monster) => monster.id === monsterId2);
+    const updateSearchParams = (key, value) => {
+    const searchParams = new URLSearchParams($page.url.searchParams);
+    searchParams.set(key, value);
+    goto(`?${searchParams.toString()}`);
+    };
 </script>
+
+<h1>{monsterId}</h1>
+<h2>{monster?.name}</h2>
+<h1>{monsterId2}</h1>
+<h2>{monster2?.name}</h2>
 
 <div class="generations">
     {#each generations as generation}
@@ -9,22 +25,28 @@
     {/each}
 </div>
 
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="monsters">
     {#each data.monsters as monster (monster.id)}
-        <div class="monster">
-            <div class="monster-content">
-                <img src={monster.image} alt={monster.name} />
-                {monster.name}
-            </div>
-            <div class="monster-id">
-                {monster.id}
-            </div>
+    <div class="monster">
+        <div on:click={() => updateSearchParams('monsterId', monster.id)}>
+          <div class="monster-content">
+            <img src={monster.image} alt={monster.name} />
+            {monster.name}
+          </div>
+          <div class="monster-id">
+            {monster.id}
+          </div>
+        </div>
+        <div on:click={() => updateSearchParams('monsterId2', monster.id)}>
+            Add Monster 2
+          </div>
         </div>
     {/each}
 </div>
 
 <style>
-     .generations {
+    .generations {
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
@@ -33,11 +55,11 @@
     .generation {
         margin: 5px;
         padding: 5px 10px;
-        border : 1px solid black;
-        background-color:beige;
+        border: 1px solid black;
+        background-color: beige;
         color: #333;
     }
-    .generation:hover{
+    .generation:hover {
         background-color: #eee;
     }
     .monsters {
